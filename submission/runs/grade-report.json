@@ -1,8 +1,8 @@
 {
- "run_id": "R-S5-grade-20261119-203508-e2cce4",
+ "run_id": "R-S5-grade-20261119-211327-373f21",
  "incident": "S5",
  "grader_version": "lab10-1.0",
- "code_hash": "e2cce487609bab24ae18a236a4556018692b141f5327103ed8df0ecb515f0efe",
+ "code_hash": "373f21f67f1444d3432eb2f44da37713cdbab0a9a27791ea454f1aa137e82170",
  "integrity": {
   "ok": true,
   "changed": [],
@@ -138,7 +138,7 @@
    },
    "monitors": {
     "escalation_rate": 0.227273,
-    "dup_refund_per_100": 0.0
+    "dup_or_topup_refund_per_100": 0.0
    },
    "by_segment": {
     "warehouse": [
@@ -379,7 +379,7 @@
    },
    "monitors": {
     "escalation_rate": 0.4,
-    "dup_refund_per_100": 0.0
+    "dup_or_topup_refund_per_100": 0.0
    },
    "by_segment": {
     "warehouse": [
@@ -573,7 +573,7 @@
    },
    "monitors": {
     "escalation_rate": 0.230769,
-    "dup_refund_per_100": 0.0
+    "dup_or_topup_refund_per_100": 0.0
    },
    "by_segment": {
     "warehouse": [
@@ -731,7 +731,7 @@
    },
    "monitors": {
     "escalation_rate": 0.3,
-    "dup_refund_per_100": 30.0
+    "dup_or_topup_refund_per_100": 30.0
    },
    "by_segment": {
     "warehouse": [
@@ -891,7 +891,7 @@
    },
    "monitors": {
     "escalation_rate": 0.227273,
-    "dup_refund_per_100": 0.0
+    "dup_or_topup_refund_per_100": 0.0
    },
    "by_segment": {
     "warehouse": [
@@ -1097,7 +1097,7 @@
    },
    "monitors": {
     "escalation_rate": 0.166667,
-    "dup_refund_per_100": 27.777778
+    "dup_or_topup_refund_per_100": 27.777778
    },
    "by_segment": {
     "warehouse": [
@@ -1215,9 +1215,9 @@
   }
  },
  "run_ids": {
-  "before": "R-S5-before-20261119-203509-e2cce4",
-  "prepared": "R-S5-prepared-20261119-203509-e2cce4",
-  "after": "R-S5-after-20261119-203509-e2cce4"
+  "before": "R-S5-before-20261119-211327-373f21",
+  "prepared": "R-S5-prepared-20261119-211327-373f21",
+  "after": "R-S5-after-20261119-211328-373f21"
  },
  "visible": {
   "before_red": true,
@@ -1239,11 +1239,11 @@
  "monitor": {
   "ok": true,
   "new": [
-   "dup_refund_per_100"
+   "dup_or_topup_refund_per_100"
   ],
   "lit": [
    {
-    "name": "dup_refund_per_100",
+    "name": "dup_or_topup_refund_per_100",
     "stage": "after",
     "base": 0.0,
     "incident": 27.777778
@@ -1275,5 +1275,5 @@
  "hard_gates_ok": true,
  "score": null,
  "verdict": "PASS-VISIBLE (chưa chạy test ẩn)",
- "seconds": 0.834
+ "seconds": 0.731
 }

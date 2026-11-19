@@ -116,7 +116,7 @@ Giải thích một câu: Y đạt 50/50 (pass_rate = 1,0), nhưng giá trị n�
 
 #### Bước 2 · Soát từng câu
 
-> **Lưu ý:** bảng này soát **sau khi đã ký** (`acceptance_criteria.lock` hash `355da292...`, ngày ký 2026-11-19). Hash chỉ tính trên `config/acceptance_criteria.json` nên soát ở đây không ảnh hưởng chữ ký. Bàn đã có kết quả mốc base (`R-base-before-20261119-161918-bde05c`) khi viết bảng này — **không viết như thể đã soát trước khi xem số**; chỗ nào soát ra thấy ngưỡng chưa ổn thì **không sửa `acceptance_criteria.json`** (sửa là bài không được tính), chỉ ghi vào dòng "Ngày xem lại tiêu chí" và vào B8 v1 mục "Một bằng chứng còn thiếu".
+> **Lưu ý:** bảng này soát **sau khi đã ký** (`acceptance_criteria.lock` hash `355da292...`, ngày ký 2026-11-19). Hash chỉ tính trên `config/acceptance_criteria.json` nên soát ở đây không ảnh hưởng chữ ký. Bàn đã có kết quả mốc base (`R-base-before-20261119-161859-bde05c`) khi viết bảng này — **không viết như thể đã soát trước khi xem số**; chỗ nào soát ra thấy ngưỡng chưa ổn thì **không sửa `acceptance_criteria.json`** (sửa là bài không được tính), chỉ ghi vào dòng "Ngày xem lại tiêu chí" và vào B8 v1 mục "Một bằng chứng còn thiếu".
 
 | Câu hỏi soát | Ghi chú của bàn |
 |---|---|

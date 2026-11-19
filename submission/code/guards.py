@@ -46,13 +46,13 @@ def pre_guard(ctx):
 
 
 def _certain_over_limit(ctx, pol) -> bool:
-    # Mirrors agent's worst-parcel delay and cause (DB truth, not the ticket claim).
+    # Same parcel, delay and cause as write_gate (DB truth, not the ticket claim).
     order = ctx.tools.lookup_order(ctx.ticket.get("order_id"))
-    if order is None or order.get("refund_status") == "REFUNDED":
+    if order is None or not order.get("parcels") or order.get("refund_status") == "REFUNDED":
         return False
-    worst = max(order["parcels"], key=lambda p: H.db_delay_days(p, ctx.as_of))
-    delay = H.db_delay_days(worst, ctx.as_of)
-    cause = worst.get("delay_cause") or ("CARRIER" if delay > 0 else None)
+    parcel = H.ticket_parcel(order, ctx.ticket, ctx.as_of)
+    delay = H.db_delay_days(parcel, ctx.as_of)
+    cause = parcel.get("delay_cause")
     paid = sum(r["amount_vnd"] for r in ctx.tools.ledger_rows(order_id=order["order_id"]))
     remaining = H.entitlement_vnd(pol, order, delay, cause) - paid
     if remaining <= pol["auto_limit_vnd"]:
@@ -119,6 +119,13 @@ def write_gate(ctx, action):
             ctx.log("deny_unentitled_refund", db_delay=db_delay, asked=asked, payer=payer)
             return Verdict.deny("không đủ điều kiện hoàn tiền theo dữ liệu tracking và chính sách")
 
+        # Strike cap checked before the refund: escalating later at file_carrier_fault would leave money already written.
+        strike_cap = ctx.tools.ops_limits().get("max_auto_strikes_per_carrier_per_day")
+        if strike_cap is not None and H.carrier_at_fault(pol, parcel, db_delay) \
+                and len(ctx.tools.fault_rows(carrier_id=parcel["carrier_id"])) >= strike_cap:
+            ctx.log("escalate_carrier_strike_cap", carrier_id=parcel["carrier_id"], cap=strike_cap, at="issue_refund")
+            return Verdict.escalate("hãng đã đủ lỗi tự động trong ngày, ca này cần người duyệt")
+
         final_amount = expected if (asked > expected or payer != "LOGIX") else asked
         if paid:
             final_amount = min(final_amount, expected - paid)
@@ -128,6 +135,19 @@ def write_gate(ctx, action):
             if not _valid_approval(ctx, action.get("approval_id"), order["order_id"], final_amount):
                 ctx.log("escalate_invalid_approval", approval_id=action.get("approval_id"), amount_vnd=final_amount)
                 return Verdict.escalate("khoản hoàn vượt hạn mức tự động, thiếu hoặc phê duyệt không hợp lệ")
+
+        # Ledger rows with no approval and basis != manual = auto refunds. Includes earlier-day seed rows (no date field).
+        cap_customer = ctx.tools.ops_limits().get("max_auto_refund_per_customer_per_day_vnd")
+        if cap_customer is not None and not _valid_approval(ctx, action.get("approval_id"), order["order_id"], final_amount):
+            auto_today = sum(r["amount_vnd"] for r in ctx.tools.ledger_rows(customer_id=order["customer_id"])
+                             if not r.get("approval_id") and r.get("basis") != "manual")
+            if auto_today + final_amount > cap_customer:
+                ctx.log("escalate_customer_auto_cap", customer_id=order["customer_id"],
+                        auto_today=auto_today, amount_vnd=final_amount, cap=cap_customer)
+                return Verdict.escalate("tổng hoàn tự động cho khách trong ngày vượt trần, cần người duyệt")
+
+        if paid:
+            ctx.log("partial_topup_after_ledger", order_id=order["order_id"], paid=paid, amount_vnd=final_amount)
 
         if final_amount != asked or final_payer != payer:
             ctx.log("modify_refund_to_db_truth", asked=asked, expected=final_amount, from_payer=payer)
@@ -150,6 +170,12 @@ def write_gate(ctx, action):
             ctx.log("deny_wrongful_carrier_fault", parcel_id=parcel["parcel_id"],
                     cause=parcel.get("delay_cause"), db_delay=db_delay)
             return Verdict.deny("hãng vận chuyển không có lỗi theo dữ liệu tracking")
+
+        strike_cap = ctx.tools.ops_limits().get("max_auto_strikes_per_carrier_per_day")
+        strikes = len(ctx.tools.fault_rows(carrier_id=parcel["carrier_id"]))
+        if strike_cap is not None and strikes >= strike_cap:
+            ctx.log("escalate_carrier_strike_cap", carrier_id=parcel["carrier_id"], strikes=strikes, cap=strike_cap)
+            return Verdict.escalate("hãng đã đủ lỗi tự động trong ngày, lỗi tiếp theo cần người duyệt")
 
         if (
             action.get("parcel_id") != parcel["parcel_id"]

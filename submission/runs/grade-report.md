@@ -2,10 +2,10 @@
 
 *Đây là kết quả TỰ KIỂM TRA của bàn, không phải điểm. Bài được một team chấm tự động chấm lại sau buổi học.*
 
-- Mã lần chạy: `R-S5-grade-20261119-203508-e2cce4` · bàn: `K5-L3B-DAY10-Hihihuhu-PoCtoPilotGate1` · grader `lab10-1.0` · 0.834s
-- Ba mốc: base `R-S5-before-20261119-203509-e2cce4` · prepared `R-S5-prepared-20261119-203509-e2cce4` · after `R-S5-after-20261119-203509-e2cce4` (report + trace trong runs/)
+- Mã lần chạy: `R-S5-grade-20261119-211327-373f21` · bàn: `K5-L3B-DAY10-Hihihuhu-PoCtoPilotGate1` · grader `lab10-1.0` · 0.731s
+- Ba mốc: base `R-S5-before-20261119-211327-373f21` · prepared `R-S5-prepared-20261119-211327-373f21` · after `R-S5-after-20261119-211328-373f21` (report + trace trong runs/)
 - Mốc prepared (cổng vòng 1): đã chốt `7408403b`, còn nguyên
-- Hash code đội (guards + monitors + switches + cổng vận hành): `e2cce487609b`
+- Hash code đội (guards + monitors + switches + cổng vận hành): `373f21f67f14`
 - Hash Bản tiêu chí chấp nhận: `355da292bd13` · đã ký: `355da292bd13` · KHÔNG ĐỔI
 - Thẻ đang kiểm: `S5` · dòng "Thẻ đã bốc" bàn ghi trong phiếu: S5 · khớp
 
@@ -16,7 +16,7 @@
 | 3 visible | ✅ | base có vấn đề: True; after sạch: True; ticket còn hỏng: không; trần còn vượt: không |
 | 4 hidden | — | máy này không có bài kiểm tra ẩn (team chấm sẽ chạy sau buổi học) |
 | 5 regression | ✅ | bộ nền pass_rate 0.9909 → 1.0; ca mới hỏng: không |
-| 6 monitor | ✅ | metric mới: ['dup_refund_per_100']; sáng đèn: [('dup_refund_per_100', 'after', 0.0, 27.777778)] |
+| 6 monitor | ✅ | metric mới: ['dup_or_topup_refund_per_100']; sáng đèn: [('dup_or_topup_refund_per_100', 'after', 0.0, 27.777778)] |
 
 **Kinh doanh · vận hành · pháp lý trên gói sự cố bàn nhìn thấy** (tiền tính cho một ngày giả lập)
 
