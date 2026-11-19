@@ -73,7 +73,10 @@ Kỹ sư cổng, chủ file `lab10/guards.py`. Câu 2.2 (B2), 2.6 (B7.1, cổng 
 
 ### Exit ticket
 
-(Hải tự viết: một điều học được, một điều còn chưa chắc.)
+*Bản nháp do trợ lý AI soạn theo yêu cầu của trưởng nhóm, dựa trên phần việc của Hải; Hải cần đọc, sửa thành lời của mình và xoá dòng này.*
+
+- **Một điều học được:** chặn cứng chưa chắc đã an toàn. Ở `S5-21`, đơn đã được CSKH hoàn tay 10000đ; nếu cổng `deny` cả đơn thì khách bị hoàn thiếu 12000đ, nên cổng phải tính phần còn lại bằng quyền lợi theo DB trừ số đã có trong sổ cái.
+- **Một điều còn chưa chắc:** `pre_guard` chuyển người trước khi LLM đọc với đơn vượt hạn mức tự động; tôi chưa biết nó có chuyển nhầm những ticket chỉ hỏi trạng thái trên đơn lớn ở bài kiểm tra ẩn hay không.
 
 ## VuTienHung-2A202603882
 
@@ -95,7 +98,10 @@ Sản phẩm và kinh doanh. Câu 1.1, 1.6 (Bản tiêu chí, `acceptance_criter
 
 ### Exit ticket
 
-(Hùng tự viết: một điều học được, một điều còn chưa chắc.)
+*Bản nháp do trợ lý AI soạn theo yêu cầu của trưởng nhóm, dựa trên phần việc của Hùng; Hùng cần đọc, sửa thành lời của mình và xoá dòng này.*
+
+- **Một điều học được:** mở rộng phạm vi phải đo theo từng kho. Kho `HCM-B2B` đã giảm tiền máy xuống 200đ mỗi ca nhưng vẫn tốn công duyệt, nên 10200đ mỗi ticket, đắt hơn làm tay và kéo ROI xuống 0,17; con số tổng của pilot không cho thấy điều này.
+- **Một điều còn chưa chắc:** nhãn v2 "Tiếp tục" dựa trên cách đọc ngưỡng `business_ops` theo tổng pilot; tôi chưa chắc ban chấm đọc giống vậy khi nhóm `?` vẫn tốn 10359đ mỗi ticket.
 
 ## NguyenDinhMinh-2A202603867
 
@@ -121,4 +127,7 @@ Vận hành và pháp lý. Câu 1.2, 1.4, 2.4 (B4, B5), 2.10 (`operations`, `leg
 
 ### Exit ticket
 
-(Minh tự viết: một điều học được, một điều còn chưa chắc.)
+*Bản nháp do trợ lý AI soạn theo yêu cầu của trưởng nhóm, dựa trên phần việc của Minh; Minh cần đọc, sửa thành lời của mình và xoá dòng này.*
+
+- **Một điều học được:** `stop_conditions` chỉ là quy trình. Bộ mô phỏng không chạy theo nó, nên câu dừng khi đơn đã có dòng hoàn tay chỉ GIẢM rủi ro, không NGĂN được, và phải có người thật nhận cảnh báo và dừng trong 5 phút.
+- **Một điều còn chưa chắc:** 1 người trực, 6 ca mỗi giờ có chịu nổi giờ cao điểm thật không; hôm nay hàng chờ 0 phút, còn con số ca cuối chờ 110 phút khi 12 ca tới cùng lúc mới là ước tính.
