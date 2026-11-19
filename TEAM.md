@@ -213,11 +213,12 @@ Vận hành và pháp lý. Xem cột Minh trong bảng phân công.
 - Phiếu A câu 1.2: viết mục tiêu cho kế toán đối soát `NV-OANH` và trưởng ca CSKH `NV-HANH`, dựa trên PRD v1.1, eval card Lab 9 và dữ liệu vận hành Lab 10.
 - Phiếu A câu 1.4: thiết kế telemetry phát hiện thông báo gửi hãng nghi lộ thông tin người nhận, gồm dữ liệu không có nhãn, công thức, xử lý thiếu dữ liệu, ngưỡng đề xuất, hành động và điểm mù.
 - Chuẩn bị ý kiến cá nhân câu 1.5 để trao đổi tại M1; bản nháp lưu cục bộ, chưa ghi kết luận thay cả bàn vào A3.
-- Dùng Codex hỗ trợ đọc tài liệu, soạn và soát các nội dung trên; chưa chạy đánh giá hay ký tiêu chí.
+- Phiếu B câu 2.4: HAZOP vòng 1 trên `file_carrier_fault` gồm 5 nhánh kỹ thuật và 4 nhánh về người, ngân sách, dữ liệu gửi bên thứ ba và quyền duyệt; điền checklist 9 nhóm việc có trạng thái, bằng chứng và PIC cụ thể.
 
 ### Bằng chứng
 
 - `templates/form-a-criteria.md`: A1 câu 1.2 và cột Telemetry production của A2 câu 1.4.
+- `templates/form-b-evaluation-gates.md`: B4 (HAZOP vòng 1) và B5 (checklist go-live lần 1).
 - Chưa có mã lần chạy: khối 1 đặt tiêu chí trước khi đánh giá. Mã commit bổ sung sau khi lưu thay đổi vào git.
 
 ### Exit ticket
