@@ -214,12 +214,13 @@ Vận hành và pháp lý. Xem cột Minh trong bảng phân công.
 - Phiếu A câu 1.4: thiết kế telemetry phát hiện thông báo gửi hãng nghi lộ thông tin người nhận, gồm dữ liệu không có nhãn, công thức, xử lý thiếu dữ liệu, ngưỡng đề xuất, hành động và điểm mù.
 - Chuẩn bị ý kiến cá nhân câu 1.5 để trao đổi tại M1; bản nháp lưu cục bộ, chưa ghi kết luận thay cả bàn vào A3.
 - Phiếu B câu 2.4: HAZOP vòng 1 trên `file_carrier_fault` gồm 5 nhánh kỹ thuật và 4 nhánh về người, ngân sách, dữ liệu gửi bên thứ ba và quyền duyệt; điền checklist 9 nhóm việc có trạng thái, bằng chứng và PIC cụ thể.
+- Phiếu B câu 2.10: điền `operations` và `legal`, runbook phần 1–3 và Giờ cao điểm; chốt người chịu trách nhiệm, 1 người trực/6 ca mỗi giờ, hạn chờ 60 phút, ngưỡng gọi tăng cường, dừng trong 5 phút, ghi chú/kiểm mẫu và cổng bảo vệ bên thứ ba.
 
 ### Bằng chứng
 
 - `templates/form-a-criteria.md`: A1 câu 1.2 và cột Telemetry production của A2 câu 1.4.
 - `templates/form-b-evaluation-gates.md`: B4 (HAZOP vòng 1) và B5 (checklist go-live lần 1).
-- Chưa có mã lần chạy: khối 1 đặt tiêu chí trước khi đánh giá. Mã commit bổ sung sau khi lưu thay đổi vào git.
+- `config/operating_gates.json`: mục `operations`, `legal`; `templates/form-b-evaluation-gates.md`: B7.5–B7.6. Số kiểm thử tích hợp cục bộ được tách khỏi report chính; Bảo ghi mã lần chạy chính thức sau khi ghép cấu hình trên máy chính.
 
 ### Exit ticket
 
