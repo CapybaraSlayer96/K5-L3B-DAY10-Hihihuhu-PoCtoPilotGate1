@@ -48,12 +48,12 @@ trợ lý có đang gây thiệt hại cho bên ngoài LogiX không; không có 
 
 | | Offline, cho MỘT bước (câu 1.3) | Telemetry production (câu 1.4) |
 |---|---|---|
-| **Bước / hành vi được đo** | | |
-| **Thước đo** (một câu, có đơn vị) | | |
-| **Dữ liệu** (lấy ở đâu, bao nhiêu, ai gán nhãn) | | |
-| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | | |
+| **Bước / hành vi được đo** | Bước **ghi lỗi hãng**: lệnh ghi `file_carrier_fault` (chạy sau sự kiện `proposal` có `do_fault = true`), ghi `carrier_id`, `parcel_id`, `driver_id`, `delay_days` vào bảng lỗi hãng | |
+| **Thước đo** (một câu, có đơn vị) | Tỉ lệ dòng lỗi hãng ghi sai (%): số dòng lỗi hãng trợ lý đã ghi mà cặp (`carrier_id`, `parcel_id`) không có trong nhãn, chia cho tổng số dòng lỗi hãng trợ lý đã ghi. Kèm một số đếm riêng: số lần chạy bỏ sót lỗi hãng mà nhãn có | |
+| **Dữ liệu** (lấy ở đâu, bao nhiêu, ai gán nhãn) | Lấy từ file trace `runs/<mã lần chạy>/traces/<ticket>@<seed>.json` của lần chạy bộ nền (22 ticket × 5 seed = 110 lần chạy; ticket nằm ngoài `business.pilot_scope` không tạo lần chạy nên không có trace). Các trường dùng: `fault_rows` (dòng đã ghi), `wrongful_faults` và `checks.carrier_fault` (đã so với nhãn), sự kiện `tracking` (độ trễ từng kiện theo DB, `cause_recorded`). Nhãn là trường `label.faults` của từng ticket trong `tickets.jsonl`, do người soạn lab gán sẵn, bàn không gán thêm. Để chẩn đoán dòng sai, đối chiếu với nguồn sự thật trong `world.json`: `orders[].parcels` (`delay_cause`, `promised_date`, `delivered_date`) và `policies` (`fault_causes`, `late.min_days_fee`) | |
+| **Cách tính** (công thức, mẫu số, cách xử lý ca thiếu dữ liệu) | Tỉ lệ sai = Σ `len(wrongful_faults)` ÷ Σ `len(fault_rows)`, cộng trên mọi lần chạy. Mẫu số chỉ đếm dòng **đã ghi**: lần chạy không tới bước này (escalated, denied, `amount ≤ 0`, `do_fault = false`) hoặc bị chặn trước khi ghi (sự kiện `gate` với action deny/escalate, `legal_gate`, `switch` off) không vào mẫu số, mà đếm riêng thành "không ghi". Mẫu số = 0 thì ghi "không áp dụng", không ghi 0%. Bỏ sót = số lần chạy có `checks.carrier_fault = false`, `wrongful_faults` rỗng và `status` khác `escalated` (ca chuyển người đã đếm trong "không ghi"). Mỗi dòng sai phân loại thêm bằng `helpers.py`: (a) **sai kiện**: `parcel_id` khác kiện mà ticket nói tới (`ticket_parcel`: `parcel_id` trong ticket, không có thì kiện trễ nhất theo DB); (b) **không có căn cứ**: `carrier_at_fault(effective_policy(...), parcel, db_delay_days(...))` = false | |
 | **Khung thời gian / ngưỡng báo động** | (không áp dụng) | |
-| **Điểm mù** (thước đo này KHÔNG thấy gì) | | |
+| **Điểm mù** (thước đo này KHÔNG thấy gì) | (1) Nhãn hoặc `delay_cause` trong DB tự sai thì thước đo không thấy. (2) Chỉ đo dòng ghi vào bảng lỗi hãng, không đo `notify_carrier` có gửi dữ liệu cá nhân cho hãng không, cũng không đo tiền hoàn. (3) `world.json` chỉ có 1/25 đơn nhiều kiện, nên lỗi "sai kiện" hiếm khi được thử trên bộ nền. (4) MockLLM tất định: 5 seed không cho thấy nhiễu của model thật | |
 
 **Ví dụ mẫu (bước "chọn độ trễ" của agent, đừng chép):**
 Thước đo: tỉ lệ lần chạy mà độ trễ agent dùng để tính tiền khác độ trễ theo tracking DB. Dữ liệu: sự kiện `proposal.delay_days_used`
