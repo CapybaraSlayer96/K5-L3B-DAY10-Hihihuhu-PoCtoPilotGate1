@@ -73,9 +73,13 @@ nhau chia cho số lần chạy có sự kiện `proposal`; lần chạy không 
 
 ### Câu 1.5 · Chọn MỘT kết luận và giải thích một câu
 
-Số minh hoạ trong đề (không phải số của bàn). Khoanh: **(a) · (b) · (c) · (d)**
+Số minh hoạ trong đề (không phải số của bàn). Khoanh: **(a) · ~~(b)~~ · (c) · (d)** → chốt **(b)**
 
-Giải thích một câu: …
+Giải thích một câu: Y đạt 50/50 (pass_rate = 1,0), nhưng giá trị này nằm **trong** khoảng tin cậy 95% của X là [0,9400; 1,0] (tính bằng bootstrap 1.000 mẫu, giống cách `lab10.eval` tính) — nên chênh lệch đúng 1 lần chạy (49/50 so với 50/50) chưa đủ căn cứ để nói Y tốt hơn X có ý nghĩa thống kê; (a) sai vì muốn "có ý nghĩa" thì giá trị Y phải nằm *ngoài* khoảng tin cậy của X; (c) sai vì "chưa bác bỏ được khác biệt" không đồng nghĩa "chắc chắn như nhau"; (d) sai vì câu 1.5 không đặt ngưỡng đạt/trượt cho X, chạy thêm seed chỉ làm khoảng tin cậy hẹp lại (giảm nhiễu), không phải điều kiện để X "đạt".
+
+**Thống nhất tại họp M1:** cả 3 proposal cá nhân (Bảo, Minh, Hùng) đều độc lập chọn (b) với cùng lý do, không cần biểu quyết thêm. Nguồn: `problem-set.md` câu 1.5 và ghi chú 1.5; cách tính `bootstrap_ci` trong `eval.py` (rút lại 1.000 lần, `rng_seed=2027`, lấy percentile 2,5%/97,5%); `docs/guide.md` dòng định nghĩa `pass_rate_ci95`.
+
+**Ảnh hưởng tới câu 1.6 (ngưỡng ký):** giữ `pass_rate_min = 0,95` làm ngưỡng trung tâm, nhưng khi đọc report thật ở câu 2.1, không chỉ so điểm số với ngưỡng một cách máy móc — nếu khoảng tin cậy của lần chạy thật "ôm" qua mốc 0,95 (biên dưới < 0,95 < biên trên), cần coi là vùng biên giới và ưu tiên chạy thêm seed hoặc đọc thêm bằng chứng khác (ví dụ `pass_k`, bảng theo kho/hãng) trước khi quyết định Tiếp tục/Dừng.
 
 ---
 
