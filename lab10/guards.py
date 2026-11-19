@@ -140,11 +140,20 @@ def write_gate(ctx, action):
 
     if tool == "notify_carrier":
         payload = dict(action.get("payload") or {})
-        removed = [k for k in ("recipient_contact", "customer_note") if k in payload]
+        pol = H.effective_policy(ctx.tools.lookup_policies(), ctx.as_of)
+        allowed = set(pol.get("carrier_notice_fields", ())) if pol else set()
+        blocked = set(ctx.gates.get("legal", {}).get("pii_fields_blocked_to_third_party") or ()) | {
+            "recipient_contact",
+            "customer_note",
+        }
+        removed = [
+            k for k in list(payload.keys())
+            if k in blocked or (allowed and k not in allowed)
+        ]
         if removed:
             for k in removed:
                 payload.pop(k, None)
             ctx.log("strip_carrier_pii", removed=removed)
-            return Verdict.modify("loại bỏ thông tin cá nhân khỏi thông báo gửi hãng", payload=payload)
+            return Verdict.modify("chỉ giữ trường thông báo cho phép, loại bỏ PII gửi hãng", payload=payload)
 
     return Verdict.allow()
