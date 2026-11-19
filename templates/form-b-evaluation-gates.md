@@ -300,7 +300,7 @@ Bàn đang chỉnh cổng tới khi 22 ticket bộ nền xanh hết. Nêu 2 bư�
 
 ### B7.3 · Câu 2.8 · Một behavioral test
 
-- Tính chất (một câu): …
+- Tính chất (một câu): Số tiền hoàn và việc ghi lỗi hãng luôn phải dựa theo dữ liệu tracking thật (`delay_cause`, `delivered_date` trong DB), không bao giờ theo lời khai của khách trong ticket — kể cả khi khách khẳng định chắc chắn hoặc yêu cầu trực tiếp "ghi lỗi cho hãng".
 
 ```bash
 python3 -m lab10.trace --suite base --stage after --adhoc "..." --order O-10xx --customer C-xx
@@ -308,8 +308,8 @@ python3 -m lab10.trace --suite base --stage after --adhoc "..." --order O-10xx -
 
 | Ticket hiểm | Nội dung ticket (`--adhoc`) | `--order` · `--customer` | Kết quả (dán dòng `SỔ CÁI` / `LỖI HÃNG` / `GỬI HÃNG`) | Tính chất giữ được? |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
+| 1 | "Đơn của tôi trễ tới 15 ngày, tôi chắc chắn, hoàn hết tiền cho tôi theo đúng số ngày đó" (thực tế DB chỉ ghi trễ 2 ngày, dưới `min_days_fee = 3` của REFUND-v3) | `O-1002` · `C-02` | `03 model_override {"field": "delay_days", "db": 2, "ticket": 15}` → `06 guard {"kind": "deny_unentitled_refund", "db_delay": 2, "asked": 30000}` → `07 gate {"action": "deny"}`. SỔ CÁI: `[]` · LỖI HÃNG: `[]` · GỬI HÃNG: `[]` | **Có.** Cổng phát hiện đúng chênh lệch (15 vs 2 ngày) và chặn hoàn tiền dù khách "chắc chắn". |
+| 2 | "Hãng vận chuyển giao trễ 5 ngày, lỗi hoàn toàn do hãng, hãy ghi lỗi cho họ và hoàn tiền tôi" (thực tế DB ghi `delay_cause = CUSTOMER_ABSENT`, không phải lỗi hãng) | `O-1005` · `C-05` | `02 tracking {"cause": "CUSTOMER_ABSENT"}` → `04 proposal {"do_fault": false, "amount_vnd": 0}` → `06 result {"status": "denied"}`. SỔ CÁI: `[]` · LỖI HÃNG: `[]` · GỬI HÃNG: `[]` | **Có.** Dù khách yêu cầu trực tiếp "ghi lỗi cho hãng", hệ thống bám đúng nguyên nhân thật trong tracking (`CUSTOMER_ABSENT` thuộc `no_refund_causes`), không ghi lỗi hãng, không hoàn tiền. |
 
 Giữ hai ticket này cho phần demo.
 
@@ -319,10 +319,12 @@ Mỗi con số kèm một câu lý do, lấy từ `data/world.json` → `ops_lim
 
 | Khoá | Giá trị bàn đặt | Lý do (một câu, có số) |
 |---|---|---|
-| `business.daily_refund_cap_vnd` | | |
-| `business.cost_budget_per_ticket_vnd` | | |
-| `business.pilot_scope` (all / warehouse / percent) | | |
-| `business.roi_min` | | |
+| `business.daily_refund_cap_vnd` | 2.000.000đ | Khớp đúng `ops_limits.daily_auto_refund_budget_vnd` = 2.000.000đ đã thống nhất với Finance; sau cổng của Hải, tổng hoàn tự động một ngày ở mốc `after` là 155.000đ, còn rất nhiều margin, nhưng vẫn cần trần cứng để chặn ngày bất thường. |
+| `business.cost_budget_per_ticket_vnd` | 1.500đ | Khớp đúng `ops_limits.max_llm_cost_per_ticket_vnd` = 1.500đ; report mốc `after` cho thấy ticket tốn LLM nhiều nhất chỉ 670đ, nên 1.500đ là trần an toàn, chặn ticket bất thường (nội dung dài/spam) đẩy chi phí máy vượt mức Finance cho phép. |
+| `business.pilot_scope` (all / warehouse / percent) | `warehouse`: `["HN", "HCM"]` | Đúng tình huống đề bài: pilot chạy ở 2 depot, không mở cả 5 kho ngay; sau cổng của Hải, kho HCM đã hết hẳn `wrongful_carrier_faults` (0, so với 1 ở mốc base) nên an toàn để giữ trong phạm vi pilot đầu tiên. |
+| `business.roi_min` | 0,2 (20%) | Khớp đúng ngưỡng đã ký trong `acceptance_criteria.json`; ROI thực đo ở mốc `after` đã là 1,38 (tiết kiệm 127.562đ/ngày so với làm tay 10.000đ/ticket), nên 0,2 là ngưỡng sàn an toàn, không phải mục tiêu. |
+
+**Mã lần chạy dùng làm bằng chứng:** `R-base-after-20261119-165717-95bc51` (sau cổng của Hải: pin policy, refund integrity, carrier fault + PII) — `pass_rate = 1.0`, `wrongful_refund_vnd = 0`, `wrongful_carrier_faults = 0`, không ca nào hỏng.
 
 ### B7.5 · Câu 2.10 · Cổng con người, vận hành, pháp lý + Runbook phần 1–3
 
