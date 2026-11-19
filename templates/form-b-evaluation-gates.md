@@ -286,9 +286,9 @@ python3 -m unittest discover -s tests
 
 | # | Cổng (hàm và nhánh, ví dụ `write_gate` khi `tool == "issue_refund"`) | Ứng với dòng nào ở B6 / B4 | Chặn điều gì, dựa vào nguồn sự thật nào | Mã lần chạy `base · after` | Ca đang đúng nào bị hỏng? (phải là "không") |
 |---|---|---|---|---|---|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
+| 1 | `write_gate` khi `tool == "issue_refund"` (kèm `pre_guard` ghim `policy_id`) | B6 **K1** (Cổng 1), K2; B4 `issue_refund` / `fail_open` | Chặn hoàn sai tiền, hoàn trùng, `fail_open`, `payer != "LOGIX"` và phê duyệt không hợp lệ: dựa vào `lookup_order`, `effective_policy`, `ledger_rows`, `ticket_parcel`, `db_delay_days`, `entitlement_vnd`, `lookup_approvals` (`deny` / `escalate` / `modify`). | `R-base-after-20261119-170211-20b021` | không (`legit_pass` 110/110, `pass_rate` 1,0) |
+| 2 | `write_gate` khi `tool == "file_carrier_fault"` | B6 **K1** (Cổng 1); B4 `file_carrier_fault` (`WRONG`, `INVALID`, `INCOMPLETE`) | Chặn ghi lỗi oan cho hãng hoặc sai kiện/sai số ngày: dựa vào `effective_policy`, `ticket_parcel`, `db_delay_days` và `carrier_at_fault` (`deny` nếu không có lỗi theo DB, `modify` nếu sai kiện/hãng/số ngày). | `R-base-after-20261119-170211-20b021` | không (`wrongful_carrier_faults` 0) |
+| 3 | `write_gate` khi `tool == "notify_carrier"` | B6 **P1** (Cổng 2); B4 `PERTURBED` (dữ liệu gửi bên thứ ba) | Chặn lộ thông tin cá nhân người nhận (`customer_note`, `recipient_contact` và `legal.pii_fields_blocked_to_third_party`): dựa vào danh sách trường cho phép `policies[].carrier_notice_fields` và `ctx.gates["legal"]` (`modify` payload). | `R-base-after-20261119-170211-20b021` | không (`pii_leaks` 0) |
 
 ### B7.2 · Câu 2.7 · Hai bước tránh rò rỉ dữ liệu
 
