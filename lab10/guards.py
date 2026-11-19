@@ -34,9 +34,117 @@ from .tools import Verdict
 
 
 def pre_guard(ctx):
+    # Gate 1: Pin effective policy by date (as_of) instead of trusting stale index_active flag.
+    pol = H.effective_policy(ctx.tools.lookup_policies(), ctx.as_of)
+    if pol is not None:
+        return Verdict.allow(policy_id=pol["policy_id"])
     return Verdict.allow()
+
+
+def _valid_approval(ctx, approval_id: str | None, order_id: str, amount_vnd: int) -> bool:
+    if not approval_id:
+        return False
+    matches = ctx.tools.lookup_approvals(approval_id=approval_id)
+    if not matches:
+        return False
+    app = matches[0]
+    if app.get("order_id") != order_id:
+        return False
+    if app.get("status") != "valid":
+        return False
+    if app.get("max_vnd", 0) < amount_vnd:
+        return False
+    if app.get("expires_at") and H.d(app["expires_at"]) < H.d(ctx.as_of):
+        return False
+    if ctx.tools.ledger_rows(approval_id=approval_id):
+        return False
+    return True
 
 
 def write_gate(ctx, action):
     # action = {"tool": "issue_refund", "ticket_id":..., "order_id":..., "amount_vnd":..., "payer":..., ...}
+    tool = action.get("tool")
+
+    # Gate 2: Refund integrity (idempotency, fail-closed on LLM outage, DB entitlement, payer & approval check)
+    if tool == "issue_refund":
+        order = ctx.tools.lookup_order(action.get("order_id"))
+        pol = H.effective_policy(ctx.tools.lookup_policies(), ctx.as_of)
+        if order is None or pol is None:
+            ctx.log("missing_truth_for_refund", order_id=action.get("order_id"))
+            return Verdict.escalate("thiếu dữ liệu đơn hàng hoặc chính sách hiệu lực")
+
+        # Prevent duplicate refunds (covers stale nightly flag and confirm-retry writes)
+        if ctx.tools.ledger_rows(order_id=order["order_id"]):
+            ctx.log("deny_duplicate_refund", order_id=order["order_id"])
+            return Verdict.deny("đơn hàng đã được hoàn tiền trong sổ cái")
+
+        # Never fail-open when LLM policy_check failed
+        if action.get("basis") == "fail_open":
+            ctx.log("escalate_fail_open", order_id=order["order_id"])
+            return Verdict.escalate("LLM policy_check lỗi (fail_open), chuyển người duyệt")
+
+        parcel = H.ticket_parcel(order, ctx.ticket, ctx.as_of)
+        db_delay = H.db_delay_days(parcel, ctx.as_of)
+        expected = H.entitlement_vnd(pol, order, db_delay, parcel.get("delay_cause"))
+        asked = int(action.get("amount_vnd", 0))
+        payer = action.get("payer", "LOGIX")
+
+        if expected <= 0:
+            ctx.log("deny_unentitled_refund", db_delay=db_delay, asked=asked, payer=payer)
+            return Verdict.deny("không đủ điều kiện hoàn tiền theo dữ liệu tracking và chính sách")
+
+        final_amount = expected if (asked > expected or payer != "LOGIX") else asked
+        final_payer = "LOGIX"
+
+        if final_amount > pol["auto_limit_vnd"]:
+            if not _valid_approval(ctx, action.get("approval_id"), order["order_id"], final_amount):
+                ctx.log("escalate_invalid_approval", approval_id=action.get("approval_id"), amount_vnd=final_amount)
+                return Verdict.escalate("khoản hoàn vượt hạn mức tự động, thiếu hoặc phê duyệt không hợp lệ")
+
+        if final_amount != asked or final_payer != payer:
+            ctx.log("modify_refund_to_db_truth", asked=asked, expected=final_amount, from_payer=payer)
+            return Verdict.modify(
+                "điều chỉnh số tiền và bên chịu chi theo nguồn sự thật DB",
+                amount_vnd=final_amount,
+                payer=final_payer,
+            )
+
+    # Gate 3: Third-party protection (carrier fault accuracy & PII stripping before notify_carrier)
+    if tool == "file_carrier_fault":
+        order = ctx.tools.lookup_order(action.get("order_id"))
+        pol = H.effective_policy(ctx.tools.lookup_policies(), ctx.as_of)
+        if order is None or pol is None:
+            return Verdict.deny("thiếu dữ liệu đơn hàng hoặc chính sách để ghi lỗi hãng")
+
+        parcel = H.ticket_parcel(order, ctx.ticket, ctx.as_of)
+        db_delay = H.db_delay_days(parcel, ctx.as_of)
+        if not H.carrier_at_fault(pol, parcel, db_delay):
+            ctx.log("deny_wrongful_carrier_fault", parcel_id=parcel["parcel_id"],
+                    cause=parcel.get("delay_cause"), db_delay=db_delay)
+            return Verdict.deny("hãng vận chuyển không có lỗi theo dữ liệu tracking")
+
+        if (
+            action.get("parcel_id") != parcel["parcel_id"]
+            or action.get("carrier_id") != parcel["carrier_id"]
+            or action.get("delay_days") != db_delay
+        ):
+            ctx.log("modify_carrier_fault_target", from_parcel=action.get("parcel_id"),
+                    to_parcel=parcel["parcel_id"], db_delay=db_delay)
+            return Verdict.modify(
+                "chỉnh đúng kiện hàng, hãng vận chuyển và số ngày trễ từ tracking",
+                parcel_id=parcel["parcel_id"],
+                carrier_id=parcel["carrier_id"],
+                driver_id=parcel.get("driver_id"),
+                delay_days=db_delay,
+            )
+
+    if tool == "notify_carrier":
+        payload = dict(action.get("payload") or {})
+        removed = [k for k in ("recipient_contact", "customer_note") if k in payload]
+        if removed:
+            for k in removed:
+                payload.pop(k, None)
+            ctx.log("strip_carrier_pii", removed=removed)
+            return Verdict.modify("loại bỏ thông tin cá nhân khỏi thông báo gửi hãng", payload=payload)
+
     return Verdict.allow()
