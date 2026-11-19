@@ -81,26 +81,26 @@ Ba loại lỗi:
 
 | # | Lỗi: người ta thấy gì (dán dòng trace / sổ cái) | Ai gặp, ai chịu | Hệ trọng (thấp / cao) | Loại lỗi (giới hạn hệ thống / ngữ cảnh / chìm) |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
+| 1 | `T-002@55`: event `02 tracking` ghi `db_delay_days: 2`, nhưng `03 model_override {"field": "delay_days", "db": 2, "ticket": 5}` ghi đè theo lời khách, dẫn tới `06 tool issue_refund` ghi sổ cái `amount_vnd: 20000` (`status: "refunded"`) trong khi nhãn đúng là `denied`, `refund_vnd: 0`. | Khách `C-02` không thấy lỗi; **LogiX-VN** mất 20.000đ và **kế toán đối soát (chị Oanh)** chịu lệch sổ. | Cao | **Lỗi chìm** |
+| 2 | `T-002@55`: hệ quả dây chuyền từ `delay_days_used: 5` ở `05 proposal`, event `07 tool file_carrier_fault` ghi lỗi `carrier_id: "VNX"`, `parcel_id: "O-1002-P1"`, `driver_id: "TX-VNX-03"`, `delay_days: 5` và `08 tool notify_carrier` gửi sang `carrier:VNX` (nhãn `faults: []`). | **Hãng vận chuyển VNX** và **tài xế `TX-VNX-03`** (bên thứ ba không tham gia hội thoại) bị ghi lỗi oan. | Cao | **Lỗi chìm** |
 
 ### Phần 2 · Tìm nguồn (đánh dấu câu nào đúng với từng lỗi)
 
 | Câu hỏi | Lỗi 1 | Lỗi 2 |
 |---|---|---|
-| **Đầu vào:** hệ thống có tự diễn giải / sửa đầu vào của người dùng theo cách họ không lường? Có đặt sai trọng số cho một lời nói hay tín hiệu của người dùng? | | |
-| **Độ liên quan:** hệ thống có thiếu dữ liệu cần để quyết đúng? Dữ liệu vào có nhiễu, thiếu ổn định? | | |
-| **Thứ bậc hệ thống:** có hai hệ thống cùng ghi / cùng theo dõi một thứ mà không rõ bên nào là chủ (ví dụ CSKH hoàn tay và trợ lý cùng ghi sổ)? | | |
-| **Trạng thái hỏng:** nhiều lỗi cộng lại có làm tính năng không dùng được (ví dụ LLM lỗi liên tiếp)? | | |
+| **Đầu vào:** hệ thống có tự diễn giải / sửa đầu vào của người dùng theo cách họ không lường? Có đặt sai trọng số cho một lời nói hay tín hiệu của người dùng? | **Đúng** (`01 llm_extract` bật `trust_claim: true`, đặt lời khai 5 ngày của khách đè lên `db_delay_days: 2` ở `03 model_override`). | **Đúng** (dùng lại `delay_days: 5` đã bị lời khai khách ghi đè để kích hoạt `do_fault: true` và ghi lỗi hãng). |
+| **Độ liên quan:** hệ thống có thiếu dữ liệu cần để quyết đúng? Dữ liệu vào có nhiễu, thiếu ổn định? | Không (DB tracking đã có đủ `db_delay_days: 2` và chính sách `REFUND-v3`). | Không (DB tracking đã có đủ `delay: 2` < ngưỡng phạt 3 ngày). |
+| **Thứ bậc hệ thống:** có hai hệ thống cùng ghi / cùng theo dõi một thứ mà không rõ bên nào là chủ (ví dụ CSKH hoàn tay và trợ lý cùng ghi sổ)? | Không (chỉ có trợ lý ghi sổ, nhưng không đối chiếu lại với DB trước khi ghi). | Không (trợ lý tự đẩy lỗi sang bảng lỗi hãng và gửi thông báo mà không đối chiếu lại tracking DB). |
+| **Trạng thái hỏng:** nhiều lỗi cộng lại có làm tính năng không dùng được (ví dụ LLM lỗi liên tiếp)? | Không (LLM không gặp lỗi 429, chỉ trích xuất sai ở seed 55). | Không. |
 
 ### Phần 3 · Hướng xử lý (mỗi lỗi một ô)
 
 | | Lỗi 1 | Lỗi 2 |
 |---|---|---|
-| Vì sao người gặp coi đây là lỗi | | |
-| Kiểu giải pháp: phản hồi cho người dùng / trao quyền kiểm soát cho người / khác | | |
-| Đường đi của người sau khi có giải pháp (ví dụ: ticket chuyển sang người duyệt → duyệt → khách được trả lời) | | |
-| Hệ thống học được gì (tín hiệu ghi lại để theo dõi: tên metric trong `monitors.py`) | | |
+| Vì sao người gặp coi đây là lỗi | Đơn `O-1002` chỉ trễ 2 ngày theo tracking DB (chưa đủ điều kiện hoàn phí 3 ngày của `REFUND-v3`), nhưng sổ cái vẫn chi 20.000đ làm thất thoát tiền và sai lệch đối soát. | Hãng VNX và tài xế `TX-VNX-03` chỉ giao trễ 2 ngày (không thuộc diện bị phạt theo chính sách), nhưng bị ghi 1 lỗi với số ngày trễ sai là 5 ngày. |
+| Kiểu giải pháp: phản hồi cho người dùng / trao quyền kiểm soát cho người / khác | **Khác (cổng chặn cấp hệ thống ngoài model)**: kiểm tra quyền lợi hoàn tiền theo nguồn sự thật DB (`H.entitlement_vnd`) trong `write_gate` trước `issue_refund`, từ chối (`Verdict.deny`) khi không đủ điều kiện và trả lời trung thực rằng đơn chưa đủ điều kiện hoàn. | **Khác (cổng chặn cấp hệ thống ngoài model)**: kiểm tra `H.carrier_at_fault` theo `db_delay_days` và `delay_cause` trong `write_gate` trước `file_carrier_fault`, chặn ghi lỗi khi DB không xác nhận hãng có lỗi. |
+| Đường đi của người sau khi có giải pháp (ví dụ: ticket chuyển sang người duyệt → duyệt → khách được trả lời) | Cổng `write_gate` chặn `issue_refund` (`Verdict.deny`) → sổ cái không ghi tiền → trợ lý gửi `send_reply` thông báo từ chối (hoàn 0đ) cho khách `C-02`; nếu khách vẫn khiếu nại thêm thì CSKH kiểm tra lại tracking. | Do `issue_refund` đã bị chặn (hoặc `file_carrier_fault` bị `Verdict.deny`), bảng lỗi hãng trống và không gửi `notify_carrier` sai sang VNX → hãng/tài xế không bị phạt oan, kế toán không phải gỡ lỗi khi đối soát. |
+| Hệ thống học được gì (tín hiệu ghi lại để theo dõi: tên metric trong `monitors.py`) | Ghi event `guard` (`deny_unentitled_refund`) vào trace; theo dõi tỉ lệ `model_override` (chênh lệch giữa `claimed_delay_days` và `db_delay_days`) và số lần cổng chặn hoàn sai trong `lab10/monitors.py`. | Ghi event `guard` (`deny_wrongful_carrier_fault`) vào trace; theo dõi tỉ lệ ca bị chặn ghi lỗi hãng không có căn cứ trong `lab10/monitors.py`. |
 
 **Ví dụ (bộ nền, đừng chép):** `T-002@55` · sổ cái có dòng hoàn 20.000đ, hãng VNX nhận một lỗi, trong khi tracking ghi trễ 2 ngày ·
 khách không thấy gì sai, hãng chịu · cao · **lỗi chìm**. Nguồn: đầu vào (đặt sai trọng số cho con số khách tự khai). Xử lý:
