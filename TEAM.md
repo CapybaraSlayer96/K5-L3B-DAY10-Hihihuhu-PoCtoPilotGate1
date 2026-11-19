@@ -46,11 +46,12 @@ Kỹ sư cổng, trưởng nhóm, giữ máy chính (mọi lần chạy chính t
 ### Bằng chứng
 
 - Commit: `4440ab1`, `00ccaba` (phân công), `c67a07d` (M0), `0992f4d` (1.3), `102c277` (2.1), `77a0e73` (B6), `63717a1` (2.7), `1f0dd5a` (chốt vòng 1), `eef17ed` (`.gitattributes`), `a1c427a` (v1), `20197f1` (nhận thẻ), `2d0a24d`, `9a12d11` (C0, C1), `1d527e7` (vòng 2, bài nộp).
-- Mã lần chạy (máy chính): base `R-base-before-20261119-161859-bde05c`, prepared `R-base-prepared-20261119-172647-37a679`, grade S5 cuối `R-S5-grade-20261119-221235-f2a82e`.
+- Mã lần chạy (máy chính): base `R-base-before-20261119-161859-bde05c`, prepared `R-base-prepared-20261119-172647-37a679`, grade S5 cuối `R-S5-grade-20261119-223942-f5ec11`.
 
 ### Exit ticket
 
-(Bảo tự viết: một điều học được, một điều còn chưa chắc.)
+- **Một điều học được:** con số trung bình có thể che tác hại. Ở lần chạy base, `pass_rate` 0,9909 vẫn đạt ngưỡng đã ký trong khi một lần chạy (`T-002@55`) đã hoàn sai 20000đ và ghi oan cho hãng; vì vậy cổng tự chặn phải nhìn từng chỉ số an toàn, không nhìn điểm tổng. Thêm một bài học vận hành: hash tính trên byte thô, nên xuống dòng CRLF/LF đủ làm hỏng chữ ký nếu không ghim bằng `.gitattributes`.
+- **Một điều còn chưa chắc:** hai trần mới trong `guards.py` (2 lỗi hãng mỗi ngày, 300000đ hoàn tự động mỗi khách mỗi ngày) chưa có ca nào kích hoạt trên bộ nền và gói S5, nên tôi chưa biết chúng có chuyển người nhầm ca đúng ở bài kiểm tra ẩn hay không.
 
 ## NguyenDinhVuHai-2A202603820
 

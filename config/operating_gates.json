@@ -18,7 +18,7 @@
       "Khi phát hiện hoặc có tín hiệu nghi lộ thông tin người nhận cho bên thứ ba, NV-TUNG dừng notify_carrier trong tối đa 5 phút; NV-HANH tiếp nhận phản ánh và xác minh.",
       "Khi thời gian chờ đạt 60 phút hoặc có ít nhất 1 ca bị ùn, NV-TUNG dừng nhận thêm ca tự động trong tối đa 5 phút, phối hợp Hùng thu hẹp phạm vi và NV-HANH bố trí người xử lý ticket tồn.",
       "Khi khoản hoàn mới làm vượt trần tự động 2000000đ/ngày, giữ khoản đó chờ người duyệt; khi chi phí vượt 9000đ/ticket, ROI dưới 0.2 hoặc có ticket vượt 1500đ tiền máy, NV-TUNG dừng mở rộng và phối hợp Hùng thu hẹp hoặc tạm dừng luồng gây vượt trần trong tối đa 5 phút.",
-      "Khi đơn đã có dòng hoàn tay (basis: manual) hoặc đã có dòng hoàn của cùng đơn trong sổ mà trợ lý định ghi thêm, NV-TUNG dừng issue_refund cho đơn đó trong tối đa 5 phút; NV-OANH là chủ đối soát sổ hoàn và đối chiếu dòng trùng, NV-HANH xác minh các ca còn lại."
+      "Khi đơn đã có dòng hoàn (kể cả dòng hoàn tay basis: manual), cổng chỉ cho trợ lý ghi phần còn lại của quyền lợi theo DB; nếu đối soát phát hiện tổng hoàn của một đơn vượt quyền lợi, NV-TUNG dừng issue_refund trong tối đa 5 phút; NV-OANH là chủ đối soát sổ hoàn và đối chiếu dòng trùng, NV-HANH xác minh các ca còn lại."
     ],
     "alert_channel": "kenh-noi-bo-logix-pilot-gate1",
     "decision_note": true,
