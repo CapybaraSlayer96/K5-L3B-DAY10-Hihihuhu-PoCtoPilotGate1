@@ -36,9 +36,30 @@ from .tools import Verdict
 def pre_guard(ctx):
     # Gate 1: Pin effective policy by date (as_of) instead of trusting stale index_active flag.
     pol = H.effective_policy(ctx.tools.lookup_policies(), ctx.as_of)
-    if pol is not None:
-        return Verdict.allow(policy_id=pol["policy_id"])
-    return Verdict.allow()
+    if pol is None:
+        return Verdict.allow()
+    # Gate 0: refund that the write gate would escalate anyway -> escalate before the LLM reads the ticket.
+    if _certain_over_limit(ctx, pol):
+        ctx.log("escalate_pre_over_limit", order_id=ctx.ticket.get("order_id"))
+        return Verdict.escalate("khoản hoàn vượt hạn mức tự động, chưa có phê duyệt")
+    return Verdict.allow(policy_id=pol["policy_id"])
+
+
+def _certain_over_limit(ctx, pol) -> bool:
+    # Mirrors agent's worst-parcel delay and cause (DB truth, not the ticket claim).
+    order = ctx.tools.lookup_order(ctx.ticket.get("order_id"))
+    if order is None or order.get("refund_status") == "REFUNDED":
+        return False
+    worst = max(order["parcels"], key=lambda p: H.db_delay_days(p, ctx.as_of))
+    delay = H.db_delay_days(worst, ctx.as_of)
+    cause = worst.get("delay_cause") or ("CARRIER" if delay > 0 else None)
+    paid = sum(r["amount_vnd"] for r in ctx.tools.ledger_rows(order_id=order["order_id"]))
+    remaining = H.entitlement_vnd(pol, order, delay, cause) - paid
+    if remaining <= pol["auto_limit_vnd"]:
+        return False
+    cands = (ctx.tools.lookup_approvals(order_id=order["order_id"])
+             + ctx.tools.lookup_approvals(customer_id=order["customer_id"]))
+    return not any(_valid_approval(ctx, a["approval_id"], order["order_id"], remaining) for a in cands)
 
 
 def _valid_approval(ctx, approval_id: str | None, order_id: str, amount_vnd: int) -> bool:
@@ -73,19 +94,24 @@ def write_gate(ctx, action):
             ctx.log("missing_truth_for_refund", order_id=action.get("order_id"))
             return Verdict.escalate("thiếu dữ liệu đơn hàng hoặc chính sách hiệu lực")
 
-        # Prevent duplicate refunds (covers stale nightly flag and confirm-retry writes)
-        if ctx.tools.ledger_rows(order_id=order["order_id"]):
-            ctx.log("deny_duplicate_refund", order_id=order["order_id"])
-            return Verdict.deny("đơn hàng đã được hoàn tiền trong sổ cái")
+        # One write per ticket (confirm-retry), then only the unpaid remainder of the entitlement
+        if action.get("ticket_id") and ctx.tools.ledger_rows(ticket_id=action["ticket_id"]):
+            ctx.log("deny_duplicate_refund", ticket_id=action["ticket_id"])
+            return Verdict.deny("ticket này đã ghi khoản hoàn")
+
+        parcel = H.ticket_parcel(order, ctx.ticket, ctx.as_of)
+        db_delay = H.db_delay_days(parcel, ctx.as_of)
+        expected = H.entitlement_vnd(pol, order, db_delay, parcel.get("delay_cause"))
+        paid = sum(r["amount_vnd"] for r in ctx.tools.ledger_rows(order_id=order["order_id"]))
+        if paid and expected - paid <= 0:
+            ctx.log("deny_duplicate_refund", order_id=order["order_id"], paid=paid, expected=expected)
+            return Verdict.deny("đơn đã hoàn đủ quyền lợi theo sổ cái")
 
         # Never fail-open when LLM policy_check failed
         if action.get("basis") == "fail_open":
             ctx.log("escalate_fail_open", order_id=order["order_id"])
             return Verdict.escalate("LLM policy_check lỗi (fail_open), chuyển người duyệt")
 
-        parcel = H.ticket_parcel(order, ctx.ticket, ctx.as_of)
-        db_delay = H.db_delay_days(parcel, ctx.as_of)
-        expected = H.entitlement_vnd(pol, order, db_delay, parcel.get("delay_cause"))
         asked = int(action.get("amount_vnd", 0))
         payer = action.get("payer", "LOGIX")
 
@@ -94,6 +120,8 @@ def write_gate(ctx, action):
             return Verdict.deny("không đủ điều kiện hoàn tiền theo dữ liệu tracking và chính sách")
 
         final_amount = expected if (asked > expected or payer != "LOGIX") else asked
+        if paid:
+            final_amount = min(final_amount, expected - paid)
         final_payer = "LOGIX"
 
         if final_amount > pol["auto_limit_vnd"]:

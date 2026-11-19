@@ -1,12 +1,17 @@
 {
-  "team": "",
-  "members": [],
-  "incident": "",
-  "decision_v1": "",
-  "decision_v2": "",
+  "team": "K5-L3B-DAY10-Hihihuhu-PoCtoPilotGate1",
+  "members": [
+    "DoanXuanDuyBao-2A202603858",
+    "NguyenDinhVuHai-2A202603820",
+    "VuTienHung-2A202603882",
+    "NguyenDinhMinh-2A202603867"
+  ],
+  "incident": "S5",
+  "decision_v1": "Tiếp tục",
+  "decision_v2": "Thu hẹp",
   "three_lines": {
-    "environment_assumption": "",
-    "reduce_or_prevent": "",
-    "measure_in_pilot": ""
+    "environment_assumption": "Giả định: trợ lý là bên hoàn tiền duy nhất và cờ `refund_status` cập nhật kịp trong ngày, nhưng gói S5 có hai dòng CSKH hoàn tay (`basis: manual`, 20000đ và 10000đ) với cờ vẫn `NONE`, nên mốc before hoàn lặp 890000đ trên 5 seed.",
+    "reduce_or_prevent": "Cổng chỉ NGĂN được hoàn lặp trong sổ: `deny_duplicate_refund` chặn 15/15 lượt hoàn trùng ở prepared và mốc after đưa hoàn sai 0đ, lỗi hãng oan 0 trên 90 lượt khi DN và CT đã vào phạm vi, còn chuyển người trước LLM chỉ GIẢM tiền máy (LLM tối đa 2412đ xuống 765đ), và trần ngày 2000000đ chưa đếm dòng hoàn tay (`tools.py:145`) nên chưa có gate ngăn tổng tiền trong ngày.",
+    "measure_in_pilot": "Vì data là mock, trước Bước đánh giá 2 phải đo trên pilot thật ở HN, HCM, DN, CT: số ca hoàn trùng trên 100 ticket (`dup_refund_per_100`: bộ nền 0,0, gói S5 mốc after 27,78), thời gian chờ và số ca ùn giờ cao điểm với 1 người trực (mô phỏng 0 phút), và chi phí LLM thật thay MockLLM (mô phỏng tối đa 765đ)."
   }
 }

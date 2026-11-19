@@ -3,7 +3,7 @@
   "business": {
     "daily_refund_cap_vnd": 2000000,
     "cost_budget_per_ticket_vnd": 1500,
-    "pilot_scope": {"mode": "warehouse", "warehouses": ["HN", "HCM"], "percent": 100},
+    "pilot_scope": {"mode": "warehouse", "warehouses": ["HN", "HCM", "DN", "CT"], "percent": 100},
     "roi_min": 0.2
   },
   "operations": {
@@ -17,7 +17,8 @@
       "Khi phát hiện lỗi hãng oan hoặc ghi lỗi tự động vượt 2 lỗi/hãng/ngày, NV-TUNG dừng file_carrier_fault và notify_carrier trong tối đa 5 phút; NV-OANH đối soát, NV-HANH xác minh.",
       "Khi phát hiện hoặc có tín hiệu nghi lộ thông tin người nhận cho bên thứ ba, NV-TUNG dừng notify_carrier trong tối đa 5 phút; NV-HANH tiếp nhận phản ánh và xác minh.",
       "Khi thời gian chờ đạt 60 phút hoặc có ít nhất 1 ca bị ùn, NV-TUNG dừng nhận thêm ca tự động trong tối đa 5 phút, phối hợp Hùng thu hẹp phạm vi và NV-HANH bố trí người xử lý ticket tồn.",
-      "Khi khoản hoàn mới làm vượt trần tự động 2000000đ/ngày, giữ khoản đó chờ người duyệt; khi chi phí vượt 9000đ/ticket, ROI dưới 0.2 hoặc có ticket vượt 1500đ tiền máy, NV-TUNG dừng mở rộng và phối hợp Hùng thu hẹp hoặc tạm dừng luồng gây vượt trần trong tối đa 5 phút."
+      "Khi khoản hoàn mới làm vượt trần tự động 2000000đ/ngày, giữ khoản đó chờ người duyệt; khi chi phí vượt 9000đ/ticket, ROI dưới 0.2 hoặc có ticket vượt 1500đ tiền máy, NV-TUNG dừng mở rộng và phối hợp Hùng thu hẹp hoặc tạm dừng luồng gây vượt trần trong tối đa 5 phút.",
+      "Khi đơn đã có dòng hoàn tay (basis: manual) hoặc đã có dòng hoàn của cùng đơn trong sổ mà trợ lý định ghi thêm, NV-TUNG dừng issue_refund cho đơn đó trong tối đa 5 phút; NV-OANH là chủ đối soát sổ hoàn và đối chiếu dòng trùng, NV-HANH xác minh các ca còn lại."
     ],
     "alert_channel": "kenh-noi-bo-logix-pilot-gate1",
     "decision_note": true,

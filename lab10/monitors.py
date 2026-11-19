@@ -19,7 +19,15 @@ def escalation_rate(trials):
     return sum(t["status"] == "escalated" for t in trials) / max(1, len(trials))
 
 
+def dup_refund_per_100(trials):
+    """Guard chặn hoàn trùng hoặc hoàn lại phần còn lại, trên 100 ticket. Thiếu events = 0 lần."""
+    kinds = {"deny_duplicate_refund", "modify_refund_to_db_truth"}
+    hits = sum(e.get("kind") in kinds for t in trials for e in (t.get("events") or []) if e.get("type") == "guard")
+    return 100 * hits / max(1, len(trials))
+
+
 MONITORS = {
     "escalation_rate": escalation_rate,     # có sẵn; KHÔNG tính là metric mới của đội
+    "dup_refund_per_100": dup_refund_per_100,
 }
 STARTER_MONITORS = ("escalation_rate",)
