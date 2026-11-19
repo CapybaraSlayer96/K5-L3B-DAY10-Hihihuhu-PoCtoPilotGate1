@@ -122,6 +122,7 @@ def write_gate(ctx, action):
         # Strike cap checked before the refund: escalating later at file_carrier_fault would leave money already written.
         strike_cap = ctx.tools.ops_limits().get("max_auto_strikes_per_carrier_per_day")
         if strike_cap is not None and H.carrier_at_fault(pol, parcel, db_delay) \
+                and not ctx.tools.fault_rows(parcel_id=parcel["parcel_id"]) \
                 and len(ctx.tools.fault_rows(carrier_id=parcel["carrier_id"])) >= strike_cap:
             ctx.log("escalate_carrier_strike_cap", carrier_id=parcel["carrier_id"], cap=strike_cap, at="issue_refund")
             return Verdict.escalate("hãng đã đủ lỗi tự động trong ngày, ca này cần người duyệt")
@@ -170,6 +171,10 @@ def write_gate(ctx, action):
             ctx.log("deny_wrongful_carrier_fault", parcel_id=parcel["parcel_id"],
                     cause=parcel.get("delay_cause"), db_delay=db_delay)
             return Verdict.deny("hãng vận chuyển không có lỗi theo dữ liệu tracking")
+
+        if ctx.tools.fault_rows(parcel_id=parcel["parcel_id"]):
+            ctx.log("deny_duplicate_carrier_fault", parcel_id=parcel["parcel_id"])
+            return Verdict.deny("kiện này đã có lỗi hãng trong sổ")
 
         strike_cap = ctx.tools.ops_limits().get("max_auto_strikes_per_carrier_per_day")
         strikes = len(ctx.tools.fault_rows(carrier_id=parcel["carrier_id"]))

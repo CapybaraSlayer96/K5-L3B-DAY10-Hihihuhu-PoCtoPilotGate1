@@ -1,8 +1,8 @@
 {
- "run_id": "R-S5-grade-20261119-211327-373f21",
+ "run_id": "R-S5-grade-20261119-221235-f2a82e",
  "incident": "S5",
  "grader_version": "lab10-1.0",
- "code_hash": "373f21f67f1444d3432eb2f44da37713cdbab0a9a27791ea454f1aa137e82170",
+ "code_hash": "f2a82e4a183b1b2f0ebff0747db6ad27dee67ad92cdcc4017fba32bc0c61e532",
  "integrity": {
   "ok": true,
   "changed": [],
@@ -138,7 +138,8 @@
    },
    "monitors": {
     "escalation_rate": 0.227273,
-    "dup_or_topup_refund_per_100": 0.0
+    "dup_or_topup_refund_per_100": 0.0,
+    "dup_refund_blocked_per_100": 0.0
    },
    "by_segment": {
     "warehouse": [
@@ -379,7 +380,8 @@
    },
    "monitors": {
     "escalation_rate": 0.4,
-    "dup_or_topup_refund_per_100": 0.0
+    "dup_or_topup_refund_per_100": 0.0,
+    "dup_refund_blocked_per_100": 0.0
    },
    "by_segment": {
     "warehouse": [
@@ -573,7 +575,8 @@
    },
    "monitors": {
     "escalation_rate": 0.230769,
-    "dup_or_topup_refund_per_100": 0.0
+    "dup_or_topup_refund_per_100": 0.0,
+    "dup_refund_blocked_per_100": 0.0
    },
    "by_segment": {
     "warehouse": [
@@ -731,7 +734,8 @@
    },
    "monitors": {
     "escalation_rate": 0.3,
-    "dup_or_topup_refund_per_100": 30.0
+    "dup_or_topup_refund_per_100": 30.0,
+    "dup_refund_blocked_per_100": 30.0
    },
    "by_segment": {
     "warehouse": [
@@ -891,7 +895,8 @@
    },
    "monitors": {
     "escalation_rate": 0.227273,
-    "dup_or_topup_refund_per_100": 0.0
+    "dup_or_topup_refund_per_100": 0.0,
+    "dup_refund_blocked_per_100": 0.0
    },
    "by_segment": {
     "warehouse": [
@@ -1097,7 +1102,8 @@
    },
    "monitors": {
     "escalation_rate": 0.166667,
-    "dup_or_topup_refund_per_100": 27.777778
+    "dup_or_topup_refund_per_100": 27.777778,
+    "dup_refund_blocked_per_100": 22.222222
    },
    "by_segment": {
     "warehouse": [
@@ -1215,9 +1221,9 @@
   }
  },
  "run_ids": {
-  "before": "R-S5-before-20261119-211327-373f21",
-  "prepared": "R-S5-prepared-20261119-211327-373f21",
-  "after": "R-S5-after-20261119-211328-373f21"
+  "before": "R-S5-before-20261119-221237-f2a82e",
+  "prepared": "R-S5-prepared-20261119-221237-f2a82e",
+  "after": "R-S5-after-20261119-221237-f2a82e"
  },
  "visible": {
   "before_red": true,
@@ -1239,7 +1245,8 @@
  "monitor": {
   "ok": true,
   "new": [
-   "dup_or_topup_refund_per_100"
+   "dup_or_topup_refund_per_100",
+   "dup_refund_blocked_per_100"
   ],
   "lit": [
    {
@@ -1247,6 +1254,12 @@
     "stage": "after",
     "base": 0.0,
     "incident": 27.777778
+   },
+   {
+    "name": "dup_refund_blocked_per_100",
+    "stage": "after",
+    "base": 0.0,
+    "incident": 22.222222
    }
   ],
   "errors": []
@@ -1275,5 +1288,5 @@
  "hard_gates_ok": true,
  "score": null,
  "verdict": "PASS-VISIBLE (chưa chạy test ẩn)",
- "seconds": 0.731
+ "seconds": 1.483
 }

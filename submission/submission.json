@@ -8,10 +8,10 @@
   ],
   "incident": "S5",
   "decision_v1": "Tiếp tục",
-  "decision_v2": "Thu hẹp",
+  "decision_v2": "Tiếp tục",
   "three_lines": {
     "environment_assumption": "Giả định: trợ lý là bên hoàn tiền duy nhất và cờ `refund_status` cập nhật kịp trong ngày, nhưng gói S5 có hai dòng CSKH hoàn tay (`basis: manual`, 20000đ và 10000đ) với cờ vẫn `NONE`, nên mốc before hoàn lặp 890000đ trên 5 seed.",
-    "reduce_or_prevent": "Cổng chỉ NGĂN được hoàn lặp trong sổ: `deny_duplicate_refund` chặn 20 sự kiện hoàn trùng trên 90 lượt ở mốc after (`R-S5-after-20261119-211326-373f21`), hoàn sai 0đ và lỗi hãng oan 0 khi DN và CT đã vào phạm vi; còn chuyển người trước LLM chỉ GIẢM tiền máy (LLM tối đa 2412đ xuống 765đ), và hai trần mới (lỗi hãng 2 mỗi ngày, hoàn theo khách 300000đ mỗi ngày) chưa kích hoạt trên dữ liệu, trần ngày 2000000đ vẫn không đếm dòng hoàn tay (`tools.py:145`).",
+    "reduce_or_prevent": "Cổng chỉ NGĂN được hoàn lặp và ghi lỗi hãng lặp mà sổ đã có: `deny_duplicate_refund` chặn 20 lần hoàn trùng trên 90 lượt ở mốc after (`R-S5-after-20261119-221234-f2a82e`), `deny_duplicate_carrier_fault` chặn ghi lỗi thứ hai cho một kiện nhưng chưa kích hoạt lần nào, và khi DN, CT đã vào phạm vi thì hoàn sai 0đ và lỗi hãng oan 0; chuyển người trước LLM chỉ GIẢM tiền máy (LLM tối đa 2412đ xuống 765đ), hai trần mới (2 lỗi hãng mỗi ngày, 300000đ hoàn tự động mỗi khách mỗi ngày) chưa kích hoạt trên dữ liệu, và trần ngày 2000000đ vẫn không đếm dòng hoàn tay (`tools.py:145`).",
     "measure_in_pilot": "Vì data là mock, trước Bước đánh giá 2 phải đo trên pilot thật ở HN, HCM, DN, CT: số sự kiện chặn hoặc bù hoàn trên 100 trial (`dup_or_topup_refund_per_100`: bộ nền 0,0, gói S5 mốc after 27,78), thời gian chờ và số ca ùn giờ cao điểm với 1 người trực (mô phỏng 0 phút), và chi phí LLM thật thay MockLLM (mô phỏng tối đa 765đ)."
   }
 }

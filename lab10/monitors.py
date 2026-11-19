@@ -26,8 +26,16 @@ def dup_or_topup_refund_per_100(trials):
     return 100 * hits / max(1, len(trials))
 
 
+def dup_refund_blocked_per_100(trials):
+    """Chỉ lần cổng chặn hoàn khi đơn hoặc ticket đã hoàn đủ trong sổ (hoàn trùng thật), trên 100 ticket."""
+    hits = sum(e.get("kind") == "deny_duplicate_refund"
+               for t in trials for e in (t.get("events") or []) if e.get("type") == "guard")
+    return 100 * hits / max(1, len(trials))
+
+
 MONITORS = {
     "escalation_rate": escalation_rate,     # có sẵn; KHÔNG tính là metric mới của đội
     "dup_or_topup_refund_per_100": dup_or_topup_refund_per_100,
+    "dup_refund_blocked_per_100": dup_refund_blocked_per_100,
 }
 STARTER_MONITORS = ("escalation_rate",)
