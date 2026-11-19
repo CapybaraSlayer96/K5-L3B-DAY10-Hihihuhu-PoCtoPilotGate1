@@ -420,19 +420,19 @@ bao nhiêu thời gian? (3) Có phần nào của dự án không nên làm ti�
 | Commit ký tiêu chí (message `Sign acceptance criteria`; hash commit, tuỳ chọn) | `75c9c69` |
 | Hash chốt cổng vòng 1 (8 ký tự lệnh `lab10.checkpoint` in ra, tuỳ chọn) | `7408403b` (chốt lúc 2026-11-19T17:26:46) |
 | Mã lần chạy dùng làm bằng chứng | bộ nền, mốc base: `R-base-before-20261119-161859-bde05c` · bộ nền với cổng vòng 1 (prepared): `R-base-prepared-20261119-172647-37a679` |
-| Còn dòng "vượt trần" nào trong report? (hàng chờ, chi phí, ROI, trần tiền, pháp lý) | |
-| Kho hoặc hãng có số xấu nhất: ____. Nếu chỉ nhìn phân khúc này, quyết định có đổi không? *(Đọc khối "theo kho và hãng" ở cuối output `lab10.eval` / `lab10.grade`, hoặc mục `by_segment` trong `report.json`.)* | |
-| Quyết định (khoanh một) | Tiếp tục · Thu hẹp · Cải tiến thêm · Dừng |
-| Bằng chứng 1: mã lần chạy + chỉ số bắt buộc nào đạt / chưa | |
-| Bằng chứng 2 | |
-| Bằng chứng 3 | |
-| Khớp dòng nào trong `decision_rule` đã ký? | |
-| Nếu Thu hẹp: cắt phần nào, vì sao | |
-| Nếu Cải tiến thêm: giả thuyết cụ thể + hạn | |
-| Nếu Dừng: bài học ghi lại | |
-| Một bằng chứng còn thiếu (thứ bộ nền chưa đo được) | |
-| Ngày quyết định lại (trừ khi Dừng) | |
-| PIC ký | |
+| Còn dòng "vượt trần" nào trong report? (hàng chờ, chi phí, ROI, trần tiền, pháp lý) | Không. Report prepared in `vượt trần: không`; lệnh 4 thoát mã 0, 9/9 ngưỡng đã ký `[ĐẠT ]`. Hàng chờ: 1 người, 6 ca/giờ, 4 ca/ngày vào hàng chờ, chờ lâu nhất 0 phút, 0 ca ùn. Chi phí 5550đ/ticket (≤ 9000đ), ROI 0,8 (≥ 0,2), hoàn tự động ngày cao nhất 155000đ (trần bàn đặt 2000000đ), lộ dữ liệu 0 |
+| Kho hoặc hãng có số xấu nhất: **HCM** (trong phạm vi pilot). Nếu chỉ nhìn phân khúc này, quyết định có đổi không? *(Đọc khối "theo kho và hãng" ở cuối output `lab10.eval` / `lab10.grade`, hoặc mục `by_segment` trong `report.json`.)* |Mọi kho, hãng trong phạm vi đều pass_rate 1,0, không hoàn sai, không lỗi oan, không lộ dữ liệu; HCM chỉ xấu nhất về chi phí (3447đ/ticket so với HN 2079đ). Riêng nhóm kho `?` (5 lần chạy, đơn không tra được kho) tốn 10359đ/ticket, cao hơn làm tay 10000đ, nhưng đã chuyển người, không gây tác hại. Nhìn riêng phân khúc này quyết định không đổi: HCM vẫn đạt mọi ngưỡng đã ký |
+| Quyết định (khoanh một) | **Tiếp tục** · Thu hẹp · Cải tiến thêm · Dừng (pilot ở 2 depot HN, HCM theo `business.pilot_scope`; quyết định lại ở v2 khi có gói sự cố) |
+| Bằng chứng 1: mã lần chạy + chỉ số bắt buộc nào đạt / chưa | `R-base-prepared-20261119-172647-37a679` (máy chính, cổng vòng 1 đã chốt `7408403b`): cả 5 chỉ số bắt buộc đạt: `pass_rate` 1,0 [1,0; 1,0] (≥ 0,95), `pass_k` 1,0 (≥ 0,85), `wrongful_refund_vnd` 0, `wrongful_carrier_faults` 0, `pii_leaks` 0. So với base `R-base-before-20261119-161859-bde05c`: hoàn sai 20000đ → 0đ, lỗi hãng oan 1 → 0, đều do cổng `write_gate` (Cổng 1, B6 K1) chặn ở `T-002@55` |
+| Bằng chứng 2 | Cùng lần chạy, nhóm `business_ops` và nên có đều đạt: chi phí 5550đ/ticket (≤ 9000đ, làm tay 10000đ), ROI 0,8 (≥ 0,2), 0 ca ùn (≤ 0), `escalation_rate` 0,2308 (≤ 0,3). Biên mỏng hơn base (ROI 1,34, 4203đ/ticket) vì phạm vi chỉ còn HN, HCM và có kiểm mẫu 10% |
+| Bằng chứng 3 | Phạm vi và người: độ phủ 0,5909 (13/22 ticket/ngày, 65 lần chạy); `operations.pic` `NV-TUNG`, `approver_id` `NV-HANH`, 1 người trực, `max_queue_wait_minutes` 60, 5 `stop_conditions`; `legal` chặn `customer_note`, `recipient_contact` và bật `carrier_fault_requires_recorded_cause`. Hai lần chạy after (`R-base-after-20261119-172636-37a679`) và prepared cho số giống hệt, tức bản chụp vòng 1 đúng bản đã thử |
+| Khớp dòng nào trong `decision_rule` đã ký? | "Tiếp tục": cả 3 chỉ số an toàn = 0, `pass_rate_min`, `pass_k_min` đạt, không vượt trần `business_ops`. **Mới khớp vế "trên bộ nền"**; vế "VÀ trên gói sự cố" chưa đo được vì chưa nhận thẻ. Vì vậy v1 là Tiếp tục có điều kiện: phải đo lại trên gói sự cố ở v2 (C12), nếu một chỉ số an toàn > 0 thì không giữ Tiếp tục. Không chọn Thu hẹp: HN, HCM là phạm vi pilot 2 depot của đề, không phải cắt phần đang trượt |
+| Nếu Thu hẹp: cắt phần nào, vì sao | Không áp dụng |
+| Nếu Cải tiến thêm: giả thuyết cụ thể + hạn | Không áp dụng |
+| Nếu Dừng: bài học ghi lại | Không áp dụng |
+| Một bằng chứng còn thiếu (thứ bộ nền chưa đo được) | Gói sự cố (vế thứ hai của dòng "Tiếp tục"). Ngoài ra bộ nền không thử: lỗi LLM 429, `write_retry`, `directive_obeyed` (0 lần), đơn nhiều kiện (1/25 đơn), trần 2 lỗi/hãng/ngày, giờ cao điểm (ca cuối chờ 110 phút nếu 12 ca tới cùng lúc là ước tính, chưa đo); MockLLM tất định nên không thấy nhiễu model thật |
+| Ngày quyết định lại (trừ khi Dừng) | 2026-11-19, phút 185–200 (quyết định v2, Phiếu C mục C12, sau khi chạy `lab10.grade --incident S5`). Xem lại tiêu chí: 21 ngày sau khi mở pilot (Phiếu A mục A4) |
+| PIC ký | Vũ Tiến Hùng (Sản phẩm và kinh doanh), cả bàn chốt ở M3: Bảo, Hải, Hùng đề xuất Tiếp tục; Minh đồng ý phương án HN, HCM, 1 người trực và yêu cầu ghi rõ vế gói sự cố chưa đo |
 
 Xong v1 thì lưu và đẩy một bản (sau mốc này không sửa cột v1):
 
