@@ -116,19 +116,21 @@ Giải thích một câu: Y đạt 50/50 (pass_rate = 1,0), nhưng giá trị n�
 
 #### Bước 2 · Soát từng câu
 
+> **Lưu ý:** bảng này soát **sau khi đã ký** (`acceptance_criteria.lock` hash `355da292...`, ngày ký 2026-11-19). Hash chỉ tính trên `config/acceptance_criteria.json` nên soát ở đây không ảnh hưởng chữ ký. Bàn đã có kết quả mốc base (`R-base-before-20261119-161918-bde05c`) khi viết bảng này — **không viết như thể đã soát trước khi xem số**; chỗ nào soát ra thấy ngưỡng chưa ổn thì **không sửa `acceptance_criteria.json`** (sửa là bài không được tính), chỉ ghi vào dòng "Ngày xem lại tiêu chí" và vào B8 v1 mục "Một bằng chứng còn thiếu".
+
 | Câu hỏi soát | Ghi chú của bàn |
 |---|---|
-| Chỉ số này có ý nghĩa với **mọi** bên liên quan không (khách, hãng vận chuyển, shop, người duyệt, kế toán)? | |
-| Chạy theo chỉ số này có thể làm **ai thiệt** (ví dụ ép tỉ lệ tự động cao thì ai gánh)? | |
-| Đây có phải nghĩa của "thành công" ở **ngày 1** của pilot không? | |
-| Còn ở **ngày thứ 1.000** (12 depot, chính sách đã đổi vài lần)? Ngưỡng nào sẽ phải viết lại? | |
+| Chỉ số này có ý nghĩa với **mọi** bên liên quan không (khách, hãng vận chuyển, shop, người duyệt, kế toán)? | Có, nhưng không đều. `wrongful_carrier_faults_max = 0` có ý nghĩa trực tiếp với hãng vận chuyển (họ bị phạt tiền theo `penalty_per_strike_vnd` và có thể bị `suspend_after_strikes_7d` nếu bị ghi lỗi oan) và với chị Oanh (đối soát sổ sai lệch mỗi tuần). `pii_leaks_max = 0` có ý nghĩa với khách và người nhận hàng (địa chỉ, SĐT). Riêng `cost_per_ticket_vnd_max`, `roi_min` chủ yếu có ý nghĩa với LogiX/Finance, ít liên quan trực tiếp tới khách hoặc hãng. |
+| Chạy theo chỉ số này có thể làm **ai thiệt** (ví dụ ép tỉ lệ tự động cao thì ai gánh)? | `escalation_rate_max = 0.3` (nice-to-have) vô tình đẩy việc sang **chị Hạnh**: ở mốc base thật, `escalation_rate` đã là 0.2273 (5 ca/ngày vào hàng chờ) với chỉ **1 người trực/ca** (`default_reviewers_on_shift = 1`) — nếu ép tỉ lệ tự động cao hơn để giảm `escalation_rate`, rủi ro là bỏ sót ca cần chuyển người, tức là đẩy rủi ro sai sót từ trợ lý sang chính chị Hạnh phải gánh hậu quả. |
+| Đây có phải nghĩa của "thành công" ở **ngày 1** của pilot không? | Đúng với **ngày 1**: pilot chỉ đo trên 2 depot (HN, HCM — `business.pilot_scope`), dùng MockLLM tất định, bộ nền 22 ticket × 5 seed. Ở quy mô nhỏ này, các ngưỡng (`pass_rate_min = 0.95`, `cost_per_ticket_vnd_max = 9000đ` so với làm tay 10.000đ) là hợp lý và đã được chứng minh đạt được ở mốc base (ngoại trừ 2 chỉ số an toàn). |
+| Còn ở **ngày thứ 1.000** (12 depot, chính sách đã đổi vài lần)? Ngưỡng nào sẽ phải viết lại? | Không chắc còn đúng. Hai ngưỡng cần viết lại trước ngày 1.000: (1) `cost_per_ticket_vnd_max` — khi mở rộng ra 12 depot và REFUND-v4 (hiệu lực từ 2026-12-01) giảm `auto_limit_vnd` xuống 100.000đ, nhiều ticket hơn sẽ phải chuyển người duyệt, kéo chi phí/ticket tăng; (2) `escalation_rate_max` — với 12 depot và chỉ tăng số người trực theo tỉ lệ tuyến tính, hàng chờ có thể vượt xa 0.3 nếu không tính lại `review_capacity_per_hour`. Cả hai cần đo lại thật trước khi áp dụng nguyên si ngưỡng của 2 depot ban đầu. |
 
 #### Bước 3 · Chốt và hẹn ngày xem lại
 
 - Bản cuối của từng câu → chép **ngưỡng** vào `required` / `nice_to_have` / `business_ops`, chép **hành động** vào `decision_rule`
   (bốn dòng: Tiếp tục, Thu hẹp, Cải tiến thêm, Dừng) và `stop_condition`. Các khoá này nằm ngay trong `config/acceptance_criteria.json`.
 - Nhóm `business_ops` (chi phí mỗi ticket tối đa, ROI tối thiểu, số ca ùn tối đa): `cost_per_ticket_vnd_max` 9.000đ (thấp hơn chi phí làm tay 10.000đ/ticket ở `ops_facts.manual_cost_per_ticket_vnd`, để có margin an toàn) · `roi_min` 0,2 (20%) · `queue_stuck_max` 0 (không ticket nào vượt `review_sla_minutes` = 60 phút mà chưa có người nhận xử lý)
-- Ngày xem lại tiêu chí: `21 ngày sau khi mở pilot` · Ai dự: `Sản phẩm và kinh doanh, Vận hành và pháp lý, Kỹ sư cổng` (ghi vào Phiếu B mục B8, dòng "Ngày quyết định lại").
+- Ngày xem lại tiêu chí: `21 ngày sau khi mở pilot, VÀ bắt buộc trước 2026-12-01 (ngày REFUND-v4 có hiệu lực) nếu có kế hoạch mở rộng quá 2 depot` · Ai dự: `Sản phẩm và kinh doanh, Vận hành và pháp lý, Kỹ sư cổng` (ghi vào Phiếu B mục B8, dòng "Ngày quyết định lại"). **Phát hiện từ Bước 2 (soát sau ký, không sửa ngưỡng đã ký):** `cost_per_ticket_vnd_max` và `escalation_rate_max` cần đo lại khi mở rộng ra >2 depot — ghi vào B8 v1 mục "Một bằng chứng còn thiếu".
 
 **Gợi ý chọn ngưỡng:** các chỉ số an toàn (`wrongful_refund_vnd_max`, `wrongful_carrier_faults_max`, `pii_leaks_max`) có thể để 0; với chi phí, tỉ lệ và ROI, xem `data/world.json` mục `ops_facts`.
 
