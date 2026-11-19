@@ -38,7 +38,7 @@ Vai cầm bút từng câu lấy từ `problem-set.md`. Bàn chỉ tự chia ở
 | Phút | Câu | Bảo | Hải | Hùng | Minh | Output (người ghi) |
 |---|---|---|---|---|---|---|
 | 0–15 | Cài đặt | Fork, đặt tên repo, mời bạn vào repo, `git config`, điền bảng `TEAM.md` | Clone, chạy `unittest` | Clone, chạy `unittest` | Clone, chạy `unittest` | Repo đúng tên; `Ran 13 tests … OK`; `TEAM.md` (Bảo) |
-| 0–15 | ★ HỌP M0 | Proposal: eval card + PRD v1.1 Lab 9 của mình | như Bảo | như Bảo | như Bảo | Một eval card + một PRD v1.1 dùng chung |
+| 0–15 | ★ HỌP M0 | Proposal: eval card + PRD v1.1 Lab 9 của mình | như Bảo | như Bảo | như Bảo | Một eval card + một PRD v1.1 dùng chung, trong `docs/lab9/` (Bảo) |
 | 15–60 | 1.1–1.4, 1.6 | 1.3: offline metric cho một bước | Đọc phần hướng dẫn mà câu 2.6 chỉ tới: đầu `guards.py`, `helpers.py`, `guide.md` Phụ lục C | 1.1; 1.6: câu tiêu chí, ranh giới đầu ra, điền `acceptance_criteria.json` | 1.2; 1.4: telemetry production | Phiếu A: A1 (Hùng, Minh), A2 (Bảo cột Offline, Minh cột Telemetry), A4 (Hùng). **Chưa chạy trợ lý** |
 | 35–40 | ★ HỌP M1 · 1.5 | Proposal: chọn (a)–(d) + một câu lý do | như Bảo | như Bảo | như Bảo | Phiếu A mục A3 (Hùng) |
 | 60–65 | Ký | — | — | Soát lần cuối; lệnh 1; chạy đúng dòng git máy in (push `main`) | — | `ĐÃ KÝ.`; `acceptance_criteria.lock`; Phiếu A mục A5 (Hùng) |
