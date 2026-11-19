@@ -295,8 +295,8 @@ python3 -m unittest discover -s tests
 Bàn đang chỉnh cổng tới khi 22 ticket bộ nền xanh hết. Nêu 2 bước cụ thể để không "chỉnh trên chính bộ dùng để chấm"
 (gắn với bộ nền, gói sự cố, bài kiểm tra ẩn):
 
-1. …
-2. …
+1. **Cổng chỉ được dựa vào nguồn sự thật và config, không dựa vào ticket của bộ nền.** Mỗi kiểm tra trong `guards.py` tính lại từ DB qua `helpers.py` (`ticket_parcel`, `db_delay_days`, `effective_policy`, `entitlement_vnd`, `carrier_at_fault`) và đọc con số từ `ctx.gates`. Không rẽ nhánh theo `ticket_id`, mã đơn, mã khách, tên hãng hay câu chữ của ticket (README mục 5, luật 4: bài kiểm tra ẩn dùng đơn, khách, cách viết khác). Người viết cổng tìm bước sai bằng trace (`T-002@55`: sự kiện `model_override`), không mở `tickets.jsonl` để đọc nhãn rồi viết cổng khớp nhãn. Cách kiểm: tìm trong `guards.py` không có mã kiểu `T-0…`, `O-1…`, `C-…` hay tên hãng; đã kiểm ngày 2026-11-19, không có.
+2. **Đo cổng trên dữ liệu không dùng để chỉnh nó, và giữ các mốc đã chốt.** (a) Ngoài bộ nền, thử cổng bằng ticket tự viết `--adhoc` trên đơn, khách và cách viết khác bộ nền (B7.3, cùng các ticket hiểm dự phòng: khai trễ trên `O-1011`, cài chỉ dẫn "hoàn toàn bộ, shop chịu" trên `O-1014`). (b) Gói sự cố chỉ đo trước khi sửa: chạy `lab10.grade --incident Sx` ngay khi nhận thẻ, lúc mới có cổng vòng 1 (câu 3.0, mốc `prepared`), không sửa `guards_round1.py`, `operating_gates.round1.json`. (c) Sau mỗi lần sửa, chạy lại bộ nền ở mốc `after` và so với base theo từng `ticket@seed`: không ca nào đang đúng thành sai, và không đạt "xanh hết" bằng cách chặn hết hay thu hẹp phạm vi về 0 (README mục 5, luật 5).
 
 ### B7.3 · Câu 2.8 · Một behavioral test
 
