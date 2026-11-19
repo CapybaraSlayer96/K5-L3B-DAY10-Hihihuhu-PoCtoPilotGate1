@@ -47,19 +47,25 @@ Chạy **trước khi sửa bất cứ thứ gì**:
 python3 -m lab10.grade --incident Sx
 ```
 
-- Mã lần chạy grade: `__________` · base: `__________` · prepared: `__________`
-- Cổng vòng 1 đỡ được ô / con số nào (so cột base với cột prepared): …
-- Khối kinh doanh và vận hành còn dòng nào vượt trần: …
+- Mã lần chạy grade: `R-S5-grade-20261119-174406-e1dd2b` · base: `R-S5-before-20261119-174407-e1dd2b` · prepared: `R-S5-prepared-20261119-174407-e1dd2b` (máy chính, chạy trước mọi sửa đổi vòng 2; `1 integrity ✅`, `2 criteria ✅`, `3 visible ✅`, `5 regression ✅`, `6 monitor ❌` vì chưa có chỉ số mới)
+- Cổng vòng 1 đỡ được ô / con số nào (so cột base với cột prepared): base có 25/150 lần chạy hỏng trên 5 ticket (`S5-02`, `S5-03`, `S5-05`, `S5-20`, `S5-21`), hoàn sai 890000đ, 20 lỗi hãng oan, ROI −0,33; prepared 0/50 hỏng, hoàn sai 0đ, lỗi oan 0, ROI 0,52. Tách theo nguyên nhân:
+  1. **Hoàn lặp trong phạm vi pilot, cổng code đỡ:** `S5-02`, `S5-03` (đơn `O-2501` đã hoàn ở `S5-01`) và `S5-20` (đơn `O-2520` đã có dòng CSKH hoàn tay `T-CSKH-2520` trong `ledger_seed`): 350000đ hoàn sai và 15 lỗi oan về 0. `write_gate` nhánh `deny_duplicate_refund` (Hải) chặn ở cả 15/15 lần chạy.
+  2. **Tiền LLM vượt trần, cổng con số đỡ:** ô "tiền LLM ticket đắt nhất · trần" 2412đ → 764đ (trần 1500đ). Ba ticket kho HN dài (`S5-70`, `S5-73`, `S5-76`, base 2018–2366đ) bị `business.cost_budget_per_ticket_vnd` = 1500 (Hùng) chuyển người trước khi đọc, chỉ tốn 200đ.
+  3. **Kho sỉ, cổng phạm vi đỡ:** ô "số kho đắt hơn làm tay" 1 → 0. 12 ticket `HCM-B2B` (`S5-50`–`S5-61`) ở base đều chuyển người nhưng vẫn tốn tiền máy (tới 2412đ); `business.pilot_scope` = HN, HCM (Hùng) đưa cả 12 ra ngoài phạm vi.
+  4. **Bị che, cổng chưa đỡ:** `S5-05` (kho DN, hoàn lặp đơn `O-2502` sau `S5-04`, 490000đ và 5 lỗi oan) và `S5-21` (kho CT, đơn `O-2521` đã được CSKH hoàn tay 10000đ, trợ lý hoàn thêm 22000đ) biến khỏi report chỉ vì DN, CT nằm ngoài `pilot_scope` (trace mốc prepared: "nằm NGOÀI phạm vi pilot"). Chưa có bằng chứng cổng xử lý được hai ca này khi mở rộng phạm vi; riêng `S5-21` là đơn đã hoàn một phần, chặn hẳn có thể thành hoàn thiếu.
+  - Lưu ý khi đọc: độ phủ giảm 1,0 → 0,3333 (10/30 ticket mỗi ngày trong phạm vi, 20 ticket làm tay). Không so số tuyệt đối base với prepared rồi coi toàn bộ cải thiện là do cổng (ý của Minh, Hùng ở M3).
+- Khối kinh doanh và vận hành còn dòng nào vượt trần: Không. Report ghi `violations: []`, "Mọi ngưỡng đã ký đều đạt", "Được phép cân nhắc 'Tiếp tục'". Prepared: chi phí 6564đ/ticket (làm tay 10000đ, ngưỡng đã ký 9000đ), ROI 0,52 (≥ 0,2), hàng chờ 1 người, 6 ca/giờ, 3 ca/ngày, chờ lâu nhất 0 phút, 0 ca ùn, hoàn tự động ngày cao nhất 43000đ (trần 2000000đ), lộ dữ liệu 0. Dòng cần để ý: chi phí mỗi ticket tăng 6083đ → 6564đ dù tổng tiền giảm, vì phí giữ chỗ người trực 30000đ/ngày và công duyệt 30000đ/ngày chia cho 10 ticket thay vì 30 (prepared: (5639 + 30000 + 30000) / 10 = 6564đ)
 
 **Mở lại pre-mortem (Phiếu B mục B6), viết bằng bút khác màu.** Với thẻ S1, S3, S4, S5 đây là một phần của phần riêng theo thẻ.
 
-- Sự cố trên thẻ thuộc lăng kính nào (kỹ thuật, kinh doanh, con người và vận hành, pháp lý)? …
-- Có nằm trong các lý do bàn đã viết không? Nếu có: cổng vòng 1 đã đỡ được bao nhiêu (đọc cột prepared trong report)? Nếu không: vì sao cả bàn không nghĩ tới? …
+- Sự cố trên thẻ thuộc lăng kính nào (kỹ thuật, kinh doanh, con người và vận hành, pháp lý)? **Kinh doanh** là chính (chi phí mỗi ticket, tiền LLM, ROI, kho sỉ làm lỗ). Phần "hoàn hai, ba lần" thuộc **kỹ thuật** (trợ lý không đọc sổ cái trước khi ghi) và **con người và vận hành** (CSKH hoàn tay và trợ lý cùng ghi một sổ cái)
+- Có nằm trong các lý do bàn đã viết không? Nếu có: cổng vòng 1 đã đỡ được bao nhiêu (đọc cột prepared trong report)? Nếu không: vì sao cả bàn không nghĩ tới? **Có, phần lớn.** B6 **B1** (chi phí mỗi ticket vượt làm tay) và **B2** (kho `HCM-B2B`) của Hùng, **K2** (ghi hoàn lặp) của Bảo, Hải. Cả ba nằm ở risk register, nhưng con số `business` (câu 2.9) và nhánh `deny_duplicate_refund` vẫn có trong bản chốt `7408403b`, nên đỡ được 15/25 lần chạy hỏng trong phạm vi, ô tiền LLM vượt trần và ô kho đắt hơn làm tay. **Bàn không nghĩ tới:** hoàn lặp do CSKH đã hoàn tay trước (`basis: "manual"`): K2 chỉ nghĩ tới `write_retry` và cờ batch đêm, không nghĩ tới hai bên cùng ghi sổ cái; và cả bàn đã không kiểm cổng có còn đúng khi mở `pilot_scope` ra ngoài HN, HCM (`S5-05`, `S5-21`)
 - Lý do còn thiếu, thêm bây giờ:
 
 | Lý do thất bại (viết ở thì quá khứ) | Lăng kính | Kiểm được bằng gì (trace / data / config nào) |
 |---|---|---|
-| | | |
+| (bút khác màu) Chị Oanh phát hiện đơn bị hoàn hai lần: CSKH đã hoàn tay một phần đơn, trợ lý không cộng phần đã hoàn trong sổ cái nên hoàn thêm; hai bên cùng ghi sổ cái mà không rõ ai là chủ | Kỹ thuật; con người và vận hành | `world_patch.json` → `ledger_seed` có dòng `basis: "manual"` (`T-CSKH-2520`, `T-CSKH-2521`); trace base `S5-21@11`: `issue_refund` 22000đ cho đơn đã có dòng 10000đ |
+| (bút khác màu) Bàn mở `pilot_scope` sang DN, CT để tăng độ phủ (đang 0,3333) mà không chạy lại gói thử; các ca hoàn lặp đang bị che lại lộ ra | Kinh doanh | `R-S5-before-20261119-174407-e1dd2b`: `S5-05` (DN) 490000đ, 5 lỗi oan; `S5-21` (CT) 50000đ; độ phủ prepared 0,3333 |
 
 ---
 
